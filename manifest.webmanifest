@@ -1,0 +1,17 @@
+{
+  "name": "台灣 3D 環島集章",
+  "short_name": "台灣集章",
+  "description": "在 3D 台灣地圖上擲骰子環島、打卡集章的大富翁遊戲",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fbf3e4",
+  "theme_color": "#0f1a2e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
