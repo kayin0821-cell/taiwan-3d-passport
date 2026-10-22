@@ -648,3 +648,32 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .share-canvas { display: block; width: 100%; height: auto; }
 .share-card .storage-note { margin: 12px 20px 0; }
 .share-btn { margin-bottom: 8px; }
+
+/* 排行榜 */
+.modal.leaderboard { width: min(520px, 100%); padding-bottom: 18px; }
+.lb-tabs { margin: 0 20px 12px; }
+.leaderboard .eyebrow { display: flex; align-items: center; gap: 6px; }
+.lb-empty { text-align: center; color: var(--muted); padding: 18px 20px 6px; line-height: 1.7; }
+.lb-empty .btn { margin-top: 8px; }
+.lb-list { list-style: none; margin: 0 20px; padding: 0; display: grid; gap: 6px; }
+.lb-list li { display: grid; grid-template-columns: 34px 28px 1fr auto 52px; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; background: #fff; border: 1px solid var(--line); }
+.lb-list li.top1 { background: linear-gradient(90deg, #fff4d6, #fff); border-color: #ecc66b; }
+.lb-list li.top2 { background: linear-gradient(90deg, #eef1f6, #fff); }
+.lb-list li.top3 { background: linear-gradient(90deg, #f8e9df, #fff); }
+.lb-list li.mine { box-shadow: 0 0 0 2px var(--seal) inset; }
+.lb-list li.fresh { animation: lbIn .6s ease; }
+@keyframes lbIn { from { transform: scale(.96); background: #fff4d6; } }
+.lb-place { font-size: 18px; font-weight: 700; text-align: center; color: var(--muted); }
+.top1 .lb-place { color: #b8862a; } .top2 .lb-place { color: #6c7a92; } .top3 .lb-place { color: #b0684a; }
+.lb-list .avatar.sm { width: 28px; height: 28px; font-size: 13px; }
+.lb-name { font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.lb-name small { font-weight: 500; font-size: 11px; color: var(--muted); background: var(--paper-2); padding: 1px 6px; border-radius: 999px; }
+.lb-name em { font-style: normal; font-size: 11px; color: #fff; background: var(--seal); padding: 1px 6px; border-radius: 999px; }
+.lb-stat b { font-size: 18px; color: var(--seal); }
+.lb-acc { color: var(--muted); font-size: 13px; text-align: right; }
+.upload-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 20px 0; padding: 10px 12px; border-radius: 12px; background: #fff8e8; color: #7a5600; font-size: 13.5px; }
+.upload-row:empty { display: none; }
+.upload-row.done { background: #e7f4ec; color: #1f6b46; }
+.upload-row.error { background: #fdeceb; color: #a51f17; }
+.upload-row .btn { margin-left: auto; }
+@media (max-width: 720px) { .lb-btn .lbl { display: none; } }
