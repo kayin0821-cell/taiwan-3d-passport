@@ -641,3 +641,10 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
   .account-btn .lbl, .foot-btn .lbl { display: none; }
   .foot-chip { top: auto; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* 分享圖 */
+.modal.share-card { width: min(520px, 100%); padding-bottom: 18px; }
+.share-frame { margin: 0 20px 14px; border-radius: 14px; overflow: hidden; background: #efe7d6; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+.share-canvas { display: block; width: 100%; height: auto; }
+.share-card .storage-note { margin: 12px 20px 0; }
+.share-btn { margin-bottom: 8px; }
