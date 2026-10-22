@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1a2e">
+<title>環島打卡・位置回報</title>
+<link rel="icon" type="image/png" href="../icons/favicon-32.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<style>
+  :root {
+    --bg: #f6efe3;
+    --card: #fffdf8;
+    --ink: #1d2433;
+    --muted: #6b6f7b;
+    --line: #e5dccb;
+    --red: #c8281e;
+    --red-dark: #a51f17;
+    --ok-bg: #e7f4ec;
+    --ok-ink: #1f6b46;
+    --err-bg: #fdeceb;
+    --err-ink: #a51f17;
+    --info-bg: #eef3fb;
+    --info-ink: #2d4f8a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(1200px 600px at 50% -200px, #ffe9cf 0%, var(--bg) 60%) fixed, var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px calc(32px + env(safe-area-inset-bottom));
+  }
+  .wrap { width: 100%; max-width: 440px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 28px 24px 24px;
+    box-shadow: 0 12px 32px rgba(60, 40, 20, .08);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .brand img { width: 44px; height: 44px; border-radius: 50%; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: .02em; }
+  .sub { color: var(--muted); font-size: 14px; margin: 4px 0 22px; line-height: 1.6; }
+  label { display: block; font-weight: 700; font-size: 14px; margin: 16px 0 6px; }
+  label .req { color: var(--red); margin-left: 2px; }
+  label .opt { color: var(--muted); font-weight: 400; }
+  input {
+    width: 100%;
+    font: inherit;
+    font-size: 16px; /* 避免 iPhone 自動放大 */
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(200, 40, 30, .12); }
+  input.invalid { border-color: var(--red); background: #fff7f6; }
+  button {
+    width: 100%;
+    margin-top: 22px;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--red);
+    border: 0;
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .15s, transform .05s;
+  }
+  button:hover { background: var(--red-dark); }
+  button:active { transform: translateY(1px); }
+  button:disabled { background: #c9b9a8; cursor: wait; }
+  .spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+    animation: spin .8s linear infinite; display: none;
+  }
+  button:disabled .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status {
+    margin-top: 16px; border-radius: 12px; padding: 12px 14px;
+    font-size: 14px; line-height: 1.7; display: none;
+  }
+  .status.show { display: block; }
+  .status.ok { background: var(--ok-bg); color: var(--ok-ink); }
+  .status.err { background: var(--err-bg); color: var(--err-ink); }
+  .status.info { background: var(--info-bg); color: var(--info-ink); }
+  .status strong { display: block; font-size: 15px; }
+  .status a { color: inherit; }
+  .history { margin-top: 22px; }
+  .history h2 { font-size: 14px; color: var(--muted); margin: 0 0 8px; font-weight: 700; }
+  .history ul { list-style: none; margin: 0; padding: 0; }
+  .history li {
+    display: flex; justify-content: space-between; gap: 8px;
+    font-size: 13px; padding: 8px 0; border-top: 1px dashed var(--line);
+  }
+  .history li span:last-child { color: var(--muted); text-align: right; }
+  .device { margin-top: 18px; font-size: 12px; color: var(--muted); word-break: break-all; }
+  .warn {
+    background: #fff4d6; color: #7a5600; border-radius: 12px; padding: 10px 12px;
+    font-size: 13px; line-height: 1.6; margin-bottom: 8px; display: none;
+  }
+  .warn.show { display: block; }
+  @media (max-width: 380px) {
+    body { padding-top: 16px; }
+    .card { padding: 22px 16px 18px; border-radius: 16px; }
+    h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="card">
+    <div class="brand">
+      <img src="../icons/icon-192.png" alt="" onerror="this.remove()">
+      <h1>環島打卡・位置回報</h1>
+    </div>
+    <p class="sub">填好團隊編號，按下按鈕，就會把你現在的位置送到雲端打卡表。</p>
+
+    <div class="warn" id="warn"></div>
+
+    <form id="form" novalidate>
+      <label for="team">團隊編號<span class="req">*</span></label>
+      <input id="team" name="team" autocomplete="off" placeholder="例如 B12" maxlength="20" required>
+
+      <label for="name">姓名／暱稱 <span class="opt">（選填）</span></label>
+      <input id="name" name="name" autocomplete="nickname" placeholder="例如 Sunny" maxlength="30">
+
+      <button type="submit" id="btn"><span class="spinner"></span><span id="btnText">取得位置並送出</span></button>
+    </form>
+
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+
+    <section class="history" id="historyBox" hidden>
+      <h2>這台裝置的打卡紀錄</h2>
+      <ul id="history"></ul>
+    </section>
+
+    <p class="device" id="device"></p>
+  </div>
+</main>
+
+<script>
+  // ① 部署好 Google Apps Script 後，把 Web App 網址貼在這裡
+  const API_URL = 'PASTE_YOUR_GAS_WEB_APP_URL_HERE';
+
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 無痕模式等情況 */ } },
+  };
+
+  // ② 裝置識別碼：第一次開啟時產生，之後重複使用
+  function getUUID() {
+    let id = store.get('checkin-uuid');
+    if (!id) {
+      id = (crypto.randomUUID && crypto.randomUUID()) ||
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+          const r = (crypto.getRandomValues(new Uint8Array(1))[0] & 15);
+          return (c === 'x' ? r : (r & 3) | 8).toString(16);
+        });
+      store.set('checkin-uuid', id);
+    }
+    return id;
+  }
+  const uuid = getUUID();
+  $('device').textContent = '裝置識別碼：' + uuid;
+
+  // 記住上次填的團隊與暱稱；網址加 ?team=B12 可直接帶入
+  const params = new URLSearchParams(location.search);
+  $('team').value = params.get('team') || store.get('checkin-team') || '';
+  $('name').value = store.get('checkin-name') || '';
+
+  if (!API_URL || API_URL.startsWith('PASTE_')) {
+    $('warn').textContent = '尚未設定後端網址（API_URL），目前只能測試定位，資料不會送到雲端。';
+    $('warn').classList.add('show');
+  }
+  if (!window.isSecureContext) {
+    $('warn').textContent = '定位功能需要 https 網址，請用 GitHub Pages 的網址開啟。';
+    $('warn').classList.add('show');
+  }
+
+  // ③ 台北時間，格式 YYYY/MM/DD HH:mm
+  function taipeiTime(d = new Date()) {
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    }).formatToParts(d).map((x) => [x.type, x.value]));
+    return `${p.year}/${p.month}/${p.day} ${p.hour}:${p.minute}`;
+  }
+
+  function showStatus(type, html) {
+    const el = $('status');
+    el.className = 'status show ' + type;
+    el.innerHTML = html;
+  }
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function setBusy(busy, text) {
+    $('btn').disabled = busy;
+    $('btnText').textContent = text || '取得位置並送出';
+  }
+
+  function getPosition() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) { reject({ code: 'NO_GEO' }); return; }
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true, timeout: 15000, maximumAge: 0,
+      });
+    });
+  }
+
+  function geoErrorText(err) {
+    switch (err && err.code) {
+      case 1: return '你拒絕了定位權限。請到瀏覽器或手機設定，允許這個網站使用位置後再試一次。';
+      case 2: return '暫時抓不到位置，請移到窗邊或戶外，並確認手機已開啟定位服務。';
+      case 3: return '定位逾時，請再按一次試試。';
+      case 'NO_GEO': return '這個瀏覽器不支援定位功能。';
+      default: return '定位失敗，請再試一次。';
+    }
+  }
+
+  // 本機打卡紀錄（只存在這台裝置）
+  function loadHistory() {
+    try { return JSON.parse(store.get('checkin-history') || '[]'); } catch (e) { return []; }
+  }
+  function renderHistory() {
+    const list = loadHistory();
+    $('historyBox').hidden = !list.length;
+    $('history').innerHTML = list.map((h) =>
+      `<li><span>${esc(h.teamCode)}${h.name ? '・' + esc(h.name) : ''}</span><span>${esc(h.timestamp)}</span></li>`
+    ).join('');
+  }
+  renderHistory();
+
+  $('team').addEventListener('input', () => $('team').classList.remove('invalid'));
+
+  $('form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const teamCode = $('team').value.trim();
+    const name = $('name').value.trim();
+    if (!teamCode) {
+      $('team').classList.add('invalid');
+      $('team').focus();
+      showStatus('err', '<strong>請先填寫團隊編號</strong>');
+      return;
+    }
+    store.set('checkin-team', teamCode);
+    store.set('checkin-name', name);
+
+    // 定位中
+    setBusy(true, '定位中…');
+    showStatus('info', '正在取得你的位置，第一次使用時請按「允許」。');
+    let pos;
+    try {
+      pos = await getPosition();
+    } catch (err) {
+      setBusy(false);
+      showStatus('err', '<strong>定位失敗</strong>' + geoErrorText(err));
+      return;
+    }
+
+    const latitude = Number(pos.coords.latitude.toFixed(6));
+    const longitude = Number(pos.coords.longitude.toFixed(6));
+    const accuracy = Math.round(pos.coords.accuracy);
+    const timestamp = taipeiTime();
+    const payload = { teamCode, uuid, name, latitude, longitude, timestamp };
+    const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+    if (!API_URL || API_URL.startsWith('PASTE_')) {
+      setBusy(false);
+      showStatus('info', `<strong>定位成功（尚未連接雲端）</strong>緯度 ${latitude}、經度 ${longitude}（誤差約 ${accuracy} 公尺）<br><a href="${mapUrl}" target="_blank" rel="noopener">在 Google 地圖查看</a>`);
+      return;
+    }
+
+    // ④ 送到 Google Apps Script（no-cors：送得出去，但讀不到回應內容）
+    setBusy(true, '送出中…');
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+      });
+      const list = loadHistory();
+      list.unshift({ teamCode, name, timestamp });
+      store.set('checkin-history', JSON.stringify(list.slice(0, 5)));
+      renderHistory();
+      showStatus('ok', `<strong>✅ 打卡成功！</strong>團隊：${esc(teamCode)}${name ? '<br>姓名：' + esc(name) : ''}<br>時間：${esc(timestamp)}<br>位置：${latitude}, ${longitude}（誤差約 ${accuracy} 公尺）<br><a href="${mapUrl}" target="_blank" rel="noopener">在 Google 地圖查看</a>`);
+    } catch (err) {
+      showStatus('err', '<strong>送出失敗</strong>請確認網路連線後再試一次。');
+    } finally {
+      setBusy(false);
+    }
+  });
+</script>
+</body>
+</html>
