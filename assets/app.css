@@ -677,3 +677,4 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .upload-row.error { background: #fdeceb; color: #a51f17; }
 .upload-row .btn { margin-left: auto; }
 @media (max-width: 720px) { .lb-btn .lbl { display: none; } }
+.stamp-pop .local-badge { margin: 4px 0 0; display: inline-block; background: var(--gold); color: var(--ink); font-weight: 700; font-size: 14px; padding: 4px 12px; border-radius: 999px; }
